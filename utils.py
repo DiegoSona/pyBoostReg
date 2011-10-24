@@ -1,8 +1,7 @@
 
-#import matplotlib as mpl
-#mpl.use('Agg')
-#import matplotlib.pyplot as pl
-import pylab as pl
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as pl
 import numpy as np
 import scipy as sp
 import scipy.stats as stat
