@@ -3,9 +3,10 @@ import numpy as np
 #import scipy.stats as stat
 #from scipy import stats
 import scipy
-from sklearn import linear_model as lm
+from scikits.learn import linear_model as lm
 import time
 import logging
+import os
 
 from utils import genbootstrap, getrankings, read_input_files, plot_weights_iter, plot_bennet_mean_std, add_to_zip, ALPHA_VALUES, RHO_VALUES
 
@@ -19,6 +20,7 @@ def regBoost(regressionModel, file_num, bootstrap = True, alpha = True, rho = Fa
     
     # Default regression model
     model = lm.LinearRegression()
+    
     if rho:
         rhos = RHO_VALUES
     else:
