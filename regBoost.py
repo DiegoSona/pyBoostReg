@@ -27,6 +27,7 @@ def regBoost(regressionModel, file_num, bootstrap = True, alpha = True, rho = Fa
         rhos = [0]
         
     delta = open('results/' + regressionModel + '_delta.txt', 'wb')
+    delta_content = ''
     
     for a,alpha in enumerate(ALPHA_VALUES):
         for r,rho in enumerate(rhos):
@@ -122,7 +123,7 @@ def regBoost(regressionModel, file_num, bootstrap = True, alpha = True, rho = Fa
 
             
             print alpha, rho, np.sum(files_deltatime)/file_num
-            delta += str(alpha) + ' ,' + str(rho) + ' ,' + str(np.sum(files_deltatime)/file_num) + '\n'
+            delta_content += str(alpha) + ' ,' + str(rho) + ' ,' + str(np.sum(files_deltatime)/file_num) + '\n'
             
             title = 'Min-Max of Rcors'
             fname_prefix = 'minmax_rcors'
@@ -139,7 +140,7 @@ def regBoost(regressionModel, file_num, bootstrap = True, alpha = True, rho = Fa
             average_intersect_size = intersect_size/file_num
             avg_features_selected = features_selected/(file_num*BOOTSTRAP_NUM)
             
-    delta.write(delta)
+    delta.write(delta_content)
     delta.close()
     
 if __name__ == '__main__':
