@@ -28,7 +28,6 @@ def gen_data(samples, features, impFeat, min_sigma=0.1, max_sigma=3, sigma_const
 
 	# Generation of dependant variable with uniform distribution in [-1,1]	
 	Y = np.random.uniform(-1,1,samples)
-	Y = Y.reshape(1,samples)
 
 	# Generation of independant variables adding white noise to
 	# uniform ditribution in [0,1].  Related features are equal to
