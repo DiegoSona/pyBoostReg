@@ -8,7 +8,8 @@ import time
 import logging
 import os
 
-from utils import genbootstrap, getrankings, read_input_files, plot_weights_iter, plot_bennet_mean_std, add_to_zip, ALPHA_VALUES, RHO_VALUES
+from utils import create_output_dirs, genbootstrap, getrankings, read_input_files, plot_weights_iter, plot_bennet_mean_std, add_to_zip, ALPHA_VALUES, RHO_VALUES
+import generate_data
 
 BOOTSTRAP_NUM = 5
 IMPFEAT = 100
@@ -39,7 +40,8 @@ def regBoost(regressionModel, file_num, bootstrap = True, alpha = True, rho = Fa
             elif regressionModel == 'Ridge':
                 model = lm.Ridge(alpha = alpha)
                 
-            input_files = read_input_files('data/', file_num)
+            #import pdb; pdb.set_trace();
+	    #input_files = read_input_files('data/', file_num)
             
             files_rcors = np.zeros([file_num, BOOTSTRAP_NUM], float)
             files_max_position = np.zeros([file_num, BOOTSTRAP_NUM], float)
@@ -52,7 +54,9 @@ def regBoost(regressionModel, file_num, bootstrap = True, alpha = True, rho = Fa
             start_time = time.time()
             
             for k in range(file_num):
-                dx, dy = input_files.next()
+                #dx, dy = input_files.next()
+		dy, dx = generate_data.gen_data(100, 200, 20)
+		print 'dx.shape: ',dx.shape
                 examples, features = dx.shape 
 
                 weights = np.zeros([features], float)
@@ -144,5 +148,6 @@ def regBoost(regressionModel, file_num, bootstrap = True, alpha = True, rho = Fa
     delta.close()
     
 if __name__ == '__main__':
-    regBoost('ElasticNet', 10)
+	create_output_dirs()
+	regBoost('ElasticNet', 10)
     
