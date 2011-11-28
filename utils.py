@@ -11,6 +11,17 @@ ALPHA_VALUES = [0.0, 0.001, 0.01, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
 RHO_VALUES = [0.0, 0.001, 0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99, 0.999, 1.0]
 
 
+"""Create plots and results directories if do not exist"""
+def create_output_dirs():
+	import os, errno
+	try:
+		os.makedirs('plots')
+		os.makedirs('results')
+	except OSError, e:
+		if e.errno != errno.EEXIST:
+			raise
+
+
 def genbootstrap(x, y):    
     X = []
     Y = []
