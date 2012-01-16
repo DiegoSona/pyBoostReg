@@ -35,12 +35,14 @@ def genbootstrap(x, y):
 
 # get ranking of top k features 
 def getrankings(arr, k):
+   # Generate array of indices of the sorted array
    l = np.argsort(arr)
    l_reversed = l[::-1]
    max_position = 0
    computed_ranking = []
    for id, item in enumerate(l_reversed):
-      if item < k:
+      # Should not it be id < k (not item < k), becuase item are weights ...	
+      if id < k:
          max_position = id
          computed_ranking.append(item)
    computed_ranking = np.asarray(computed_ranking)
