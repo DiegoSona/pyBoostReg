@@ -10,14 +10,14 @@ import os
 
 from utils import create_output_dirs, genbootstrap, getrankings, read_input_files, plot_weights_iter, plot_bennet_mean_std, add_to_zip, ALPHA_VALUES, RHO_VALUES
 import generate_data
-
+from gen_redundant_data import genRedundantData
 
 logging.basicConfig(level=logging.DEBUG)
     
 def regBoost(x, y, regressionModel, bootstrap_num, impFeat):
     
     intersect_size = 0
-    features_selected = 0
+    #features_selected = 0
 
     start_time = time.time()
 
@@ -44,7 +44,8 @@ def regBoost(x, y, regressionModel, bootstrap_num, impFeat):
 	weights_iter[j,:] = weights
 
 	non_zero_features = np.sum(regressionModel.coef_ != 0)
-	features_selected += non_zero_features
+	#print 'Non zero features: ', non_zero_features #regressionModel.coef_ != 0
+	#features_selected += non_zero_features
 
 	max_position, computed_ranking = getrankings(weights, impFeat)
 	max_position_iter.append(max_position)
@@ -53,13 +54,15 @@ def regBoost(x, y, regressionModel, bootstrap_num, impFeat):
 	
 	rcors.append(rcor)
 			    
-	l = np.argsort(regressionModel.coef_)[-non_zero_features:]  
+	l = np.argsort(regressionModel.coef_)[-non_zero_features:]
+	#print 'L : ', l  
 	
 	if len(intersect):
 	    intersect = set(l).intersection(intersect)
 	else:
 	    intersect = set(l)
-	intersect = intersect.intersection(set(range(impFeat)))    
+	intersect = intersect.intersection(set(range(impFeat)))
+	#print 'Intersect : ', len(intersect)    
 	intersect_size_iter.append(len(intersect))
     end_time = time.time()
     deltatime = end_time - start_time  	
@@ -74,13 +77,15 @@ if __name__ == '__main__':
     # Parameters setting
     file_num = 10
     alpha = True	
-    rho = False
+    rho = True
     bootstrap = True
     samples = 100
-    features = 200
+    features = 300
     impFeat = 20
-    bootstrap_num = 50
+    bootstrap_num = 10
     regressionModel = 'ElasticNet'
+    #regressionModel = 'Lasso'
+    #regressionModel = 'Ridge'
     
     
     files_rcors = np.zeros([file_num, bootstrap_num], float)
@@ -100,7 +105,11 @@ if __name__ == '__main__':
         rhos = RHO_VALUES
     else:
         rhos = [0]
-        
+    
+    rc = ''
+    best_alpha = 0
+    best_rho = 0
+    best_mean_rcor = 0			    
         
     for a,alpha in enumerate(ALPHA_VALUES):
         for r,rho in enumerate(rhos):
@@ -109,17 +118,25 @@ if __name__ == '__main__':
                 model = lm.ElasticNet(alpha = alpha, rho = rho)
             elif regressionModel == 'Lasso':
                 model = lm.Lasso(alpha = alpha)
-            elif regressionModel == 'Ridge':
+            elif regressionModel == 'Ridge' and alpha != 0:
                 model = lm.Ridge(alpha = alpha)
                 
             for k in range(file_num):
 		dy, dx = generate_data.gen_data(samples, features, impFeat)
+		#dy, dx = genRedundantData(100, 6, 2, 2)
                 examples, features = dx.shape
 		
 		(weights_iter, rcors, max_position_iter, intersect_size_iter, deltatime) = regBoost(dx, dy, model, bootstrap_num, impFeat)
 	    
 		files_rcors[k,:] = rcors
-                files_max_position[k,:] = max_position_iter
+                if np.mean(rcors) > best_mean_rcor:
+			best_mean_rcor = np.mean(rcors)
+			best_alpha = alpha
+			if regressionModel == 'ElasticNet' and rho != 0:
+				best_rho = rho
+
+	    	rc += str(alpha) + ',' + str(rho) + ',' + str(np.mean(rcors)) + '\n'
+		files_max_position[k,:] = max_position_iter
                 files_intersect_size[k,:] = intersect_size_iter
                 files_deltatime[k] = deltatime  
 		
@@ -137,7 +154,8 @@ if __name__ == '__main__':
             title = 'Min-Max of Rcors'
             fname_prefix = 'minmax_rcors'
             plot_bennet_mean_std(title, fname_prefix, alpha, rho, bootstrap_num, files_rcors)
-            
+				
+ 
             title = 'Min-Max of MaxPos'
             fname_prefix = 'minmax_maxpos'
             plot_bennet_mean_std(title, fname_prefix, alpha, rho, bootstrap_num, files_max_position)
@@ -151,3 +169,5 @@ if __name__ == '__main__':
     delta.write(delta_content)
     delta.close()
     
+    print rc	
+    print 'Best param : ', best_alpha, best_rho, best_mean_rcor
