@@ -80,12 +80,12 @@ if __name__ == '__main__':
     rho = True
     bootstrap = True
     samples = 100
-    features = 300
+    features = 100
     impFeat = 20
-    bootstrap_num = 10
+    bootstrap_num = 5
     regressionModel = 'ElasticNet'
     #regressionModel = 'Lasso'
-    #regressionModel = 'Ridge'
+    regressionModel = 'Ridge'
     
     
     files_rcors = np.zeros([file_num, bootstrap_num], float)
@@ -109,18 +109,19 @@ if __name__ == '__main__':
     rc = ''
     best_alpha = 0
     best_rho = 0
-    best_mean_rcor = 0			    
+    best_mean_rcor = 0
+    best_mean_max_pos = features
+    best_mean_max_intersect = 0
+    
+    if regressionModel == 'ElasticNet':
+	model = lm.ElasticNet(alpha = alpha, rho = rho)
+    elif regressionModel == 'Lasso':
+	model = lm.Lasso(alpha = alpha)
+    elif regressionModel == 'Ridge' and alpha != 0:
+	model = lm.Ridge(alpha = alpha)
         
     for a,alpha in enumerate(ALPHA_VALUES):
         for r,rho in enumerate(rhos):
-            
-            if regressionModel == 'ElasticNet':
-                model = lm.ElasticNet(alpha = alpha, rho = rho)
-            elif regressionModel == 'Lasso':
-                model = lm.Lasso(alpha = alpha)
-            elif regressionModel == 'Ridge' and alpha != 0:
-                model = lm.Ridge(alpha = alpha)
-                
             for k in range(file_num):
 		dy, dx = generate_data.gen_data(samples, features, impFeat)
 		#dy, dx = genRedundantData(100, 6, 2, 2)
@@ -134,7 +135,11 @@ if __name__ == '__main__':
 			best_alpha = alpha
 			if regressionModel == 'ElasticNet' and rho != 0:
 				best_rho = rho
-
+			if best_mean_max_pos < np.mean(max_position_iter):
+			    best_mean_max_pos = np.mean(max_position_iter)
+			if best_mean_max_intersect > np.mean(intersect_size_iter):
+			    best_mean_max_intersect = np.mean(intersect_size_iter)
+			    
 	    	rc += str(alpha) + ',' + str(rho) + ',' + str(np.mean(rcors)) + '\n'
 		files_max_position[k,:] = max_position_iter
                 files_intersect_size[k,:] = intersect_size_iter
@@ -170,4 +175,4 @@ if __name__ == '__main__':
     delta.close()
     
     print rc	
-    print 'Best param : ', best_alpha, best_rho, best_mean_rcor
+    print 'Best param : ', best_alpha, best_rho, best_mean_rcor, best_mean_max_pos, best_mean_max_intersect
