@@ -11,6 +11,7 @@ import os
 from utils import create_output_dirs, genbootstrap, getrankings, read_input_files, plot_weights_iter, plot_bennet_mean_std, add_to_zip, ALPHA_VALUES, RHO_VALUES
 import generate_data
 from gen_redundant_data import genRedundantData
+import properties as props
 
 logging.basicConfig(level=logging.DEBUG)
     
@@ -39,6 +40,7 @@ def regBoost(x, y, regressionModel, bootstrap_num, impFeat):
 	
 	regressionModel.fit(x, y)
 	
+	print ' regressionModel.coef_ : ', regressionModel.coef_.all() == 0
 	weights += regressionModel.coef_
 	
 	weights_iter[j,:] = weights
@@ -74,19 +76,17 @@ def regBoost(x, y, regressionModel, bootstrap_num, impFeat):
 if __name__ == '__main__':
     
     
-    # Parameters setting
-    file_num = 10
-    alpha = True	
-    rho = True
-    bootstrap = True
-    samples = 100
-    features = 100
-    impFeat = 20
-    bootstrap_num = 5
-    regressionModel = 'ElasticNet'
-    #regressionModel = 'Lasso'
-    regressionModel = 'Ridge'
-    
+    # Loading parameters 
+    file_num = props.file_num
+    alpha = props.alpha	
+    rho = props.rho
+    bootstrap = props.bootstrap
+    samples = props.samples
+    features = props.features
+    impFeat = props.impFeat
+    bootstrap_num = props.bootstrap_num
+    regressionModel = props.regressionModel
+   
     
     files_rcors = np.zeros([file_num, bootstrap_num], float)
     files_max_position = np.zeros([file_num, bootstrap_num], float)
