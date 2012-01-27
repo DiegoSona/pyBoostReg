@@ -40,14 +40,15 @@ def regBoost(x, y, regressionModel, bootstrap_num, impFeat):
 	
 	regressionModel.fit(x, y)
 	
+	print regressionModel.coef_
+	raise valueError
 	print ' regressionModel.coef_ : ', regressionModel.coef_.all() == 0
 	weights += regressionModel.coef_
 	
 	weights_iter[j,:] = weights
 
-	non_zero_features = np.sum(regressionModel.coef_ != 0)
-	#print 'Non zero features: ', non_zero_features #regressionModel.coef_ != 0
-	#features_selected += non_zero_features
+	#non_zero_features = np.sum(regressionModel.coef_ != 0)
+	print 'Non zero features: ', len(np.where(regressionModel.coef_ !=0)) 	#features_selected += non_zero_features
 
 	max_position, computed_ranking = getrankings(weights, impFeat)
 	max_position_iter.append(max_position)
@@ -56,7 +57,7 @@ def regBoost(x, y, regressionModel, bootstrap_num, impFeat):
 	
 	rcors.append(rcor)
 			    
-	l = np.argsort(regressionModel.coef_)[-non_zero_features:]
+	l = np.argsort(regressionModel.coef_)[np.where(regressionModel.coef_ !=0)]
 	#print 'L : ', l  
 	
 	if len(intersect):
@@ -113,16 +114,22 @@ if __name__ == '__main__':
     best_mean_max_pos = features
     best_mean_max_intersect = 0
     
-    if regressionModel == 'ElasticNet':
-	model = lm.ElasticNet(alpha = alpha, rho = rho)
-    elif regressionModel == 'Lasso':
-	model = lm.Lasso(alpha = alpha)
-    elif regressionModel == 'Ridge' and alpha != 0:
-	model = lm.Ridge(alpha = alpha)
+    
         
     for a,alpha in enumerate(ALPHA_VALUES):
         for r,rho in enumerate(rhos):
-            for k in range(file_num):
+            
+	    if regressionModel == 'ElasticNet':
+		model = lm.ElasticNet(alpha = alpha, rho = rho)
+	    elif regressionModel == 'Lasso':
+		model = lm.Lasso(alpha = alpha)
+	    elif regressionModel == 'Ridge' and alpha != 0:
+		model = lm.Ridge(alpha = alpha)
+	    
+	    for k in range(file_num):
+		
+		
+		
 		dy, dx = generate_data.gen_data(samples, features, impFeat)
 		#dy, dx = genRedundantData(100, 6, 2, 2)
                 examples, features = dx.shape
