@@ -1,0 +1,12 @@
+# Parameters setting
+file_num = 10
+alpha = True	
+rho = True
+bootstrap = True
+samples = 100
+features = 100
+impFeat = 20
+bootstrap_num = 10
+regressionModel = 'ElasticNet'
+#regressionModel = 'Lasso'
+#regressionModel = 'Ridge'
